@@ -7,14 +7,9 @@
 
 import UIKit
 
-protocol PhotosCollectionViewControllerDelegate {
-    func getData(from imageData: Image)
-}
-
 class PhotosCollectionViewController: UICollectionViewController, UICollectionViewDelegateFlowLayout {
 
     private var images: [Image] = []
-    var delegate: PhotosCollectionViewControllerDelegate?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -61,9 +56,6 @@ class PhotosCollectionViewController: UICollectionViewController, UICollectionVi
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let image = images[indexPath.row]
         guard let cell = collectionView.cellForItem(at: indexPath) as? PhotoCollectionViewCell else { return }
-        print(image)
-//        guard let delegate = delegate else { return }
-//        delegate.getData(from: image)
         let photoDetailsVC = PhotoDetailsViewController()
         photoDetailsVC.modalPresentationStyle = .currentContext
         photoDetailsVC.photoDetails = image
@@ -75,17 +67,7 @@ class PhotosCollectionViewController: UICollectionViewController, UICollectionVi
         return CGSize(width: view.frame.size.width / 3-1, height: 150)
     }
 }
-//
-//extension PhotosCollectionViewController {
-//    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-//        guard let photoDetailsVC = segue.destination as? PhotoDetailsViewController else { return }
-//        photoDetailsVC.photoDetails = sender as? Image
-//
-//        guard let indexPath = collectionView.indexPathsForSelectedItems?.first else { return }
-//        guard let cell = collectionView.cellForItem(at: indexPath) as? PhotoCollectionViewCell else { return }
-//        photoDetailsVC.image = cell.imageView.image
-//    }
-//}
+
 // MARK: - Networking
 extension PhotosCollectionViewController {
     private func getImageData() {

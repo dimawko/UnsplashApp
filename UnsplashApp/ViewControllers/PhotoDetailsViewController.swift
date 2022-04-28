@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import RealmSwift
 
 class PhotoDetailsViewController: UIViewController {
 
@@ -23,15 +24,63 @@ class PhotoDetailsViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        view.backgroundColor = .white
+        setupView()
+        setupNavBar()
+        print(Realm.Configuration.defaultConfiguration.fileURL!)
+    }
+
+
+    private func setupView() {
+        view.addSubview(imageView)
+        imageView.image = image
+
+        NSLayoutConstraint.activate([
+            imageView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            imageView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            imageView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            imageView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
+
+        ])
+    }
+
+    private func formatDate(from string: String) -> String {
+        var convertedString = ""
+        let dateFormatterGet = DateFormatter()
+        dateFormatterGet.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZZZZZ"
+
+        let dateFormatterSet = DateFormatter()
+        dateFormatterSet.dateFormat = "MMM dd, yyyy"
+        dateFormatterSet.locale = Locale(identifier: "en_US_POSIX")
+
+        guard let date = dateFormatterGet.date(from: string) else { return "" }
+        convertedString = dateFormatterSet.string(from: date)
+
+        return convertedString
+    }
+}
+
+// MARK: - Set up navigation bar items
+extension PhotoDetailsViewController {
+    private func setupNavBar() {
         let infoButton = UIBarButtonItem(
             image: UIImage(systemName: "info.circle"),
             style: .plain,
             target: self,
             action: #selector(showInfo)
         )
-        view.backgroundColor = .white
-        navigationItem.rightBarButtonItem = infoButton
-        setupView()
+
+        let addToFavoritesButton = UIBarButtonItem(
+            image: UIImage(systemName: "heart.fill"),
+            style: .plain,
+            target: self,
+            action: #selector(addToFavorites)
+        )
+        navigationItem.rightBarButtonItems = [addToFavoritesButton, infoButton]
+    }
+
+    @objc func addToFavorites() {
+        StorageManager.shared.save(photoDetails)
     }
 
     @objc func showInfo() {
@@ -49,33 +98,5 @@ class PhotoDetailsViewController: UIViewController {
         let okAction = UIAlertAction(title: "OK", style: .default)
         alert.addAction(okAction)
         present(alert, animated: true)
-    }
-
-    private func formatDate(from string: String) -> String {
-        var convertedString = ""
-        let dateFormatterGet = DateFormatter()
-        dateFormatterGet.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZZZZZ"
-
-        let dateFormatterSet = DateFormatter()
-        dateFormatterSet.dateFormat = "MMM dd, yyyy"
-        dateFormatterSet.locale = Locale(identifier: "en_US_POSIX")
-
-        guard let date = dateFormatterGet.date(from: string) else { return "" }
-        convertedString = dateFormatterSet.string(from: date)
-
-        return convertedString
-    }
-
-    private func setupView() {
-        view.addSubview(imageView)
-        imageView.image = image
-
-        NSLayoutConstraint.activate([
-            imageView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            imageView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            imageView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            imageView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
-
-        ])
     }
 }

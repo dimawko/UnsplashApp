@@ -34,7 +34,8 @@ class NetworkManager {
     }
 
     func fetchImage(with imageData: Image, completion: @escaping(Result<Data, Error>) -> Void) {
-        guard let url = URL(string: imageData.urls!.regular) else { return }
+        guard let imageDataUrl = imageData.urls?.regular else { return }
+        guard let url = URL(string: imageDataUrl) else { return }
         URLSession.shared.downloadTask(with: url) { localUrl, _, error in
             guard let localUrl = localUrl else {
                 print(error?.localizedDescription ?? "No error description")
