@@ -17,8 +17,9 @@ class FavoriteTableViewController: UITableViewController {
 
         favoriteImages = StorageManager.shared.realm?.objects(Image.self)
 
-        self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: "favoriteCell")
+        self.tableView.register(FavoriteTableViewCell.self, forCellReuseIdentifier: FavoriteTableViewCell.indetifier)
         title = "Favorite"
+        tableView.rowHeight = 100
     }
 
     // MARK: - Table view data source
@@ -29,14 +30,14 @@ class FavoriteTableViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let favoriteImage = favoriteImages[indexPath.row]
-        let cell = tableView.dequeueReusableCell(withIdentifier: "favoriteCell", for: indexPath)
-        cell.textLabel?.text = favoriteImage.user?.name
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: FavoriteTableViewCell.indetifier, for: indexPath) as? FavoriteTableViewCell else { return UITableViewCell() }
+        cell.nameLabel.text = favoriteImage.user?.name
         NetworkManager.shared.fetchImage(with: favoriteImage) { result in
             switch result {
             case .success(let data):
                 let cellimage = self.getImage(from: data)
                 DispatchQueue.main.async {
-                    cell.imageView!.image = cellimage
+                    cell.photoImage.image = cellimage
                 }
             case .failure(let error):
                 print(error)
@@ -47,11 +48,11 @@ class FavoriteTableViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let favoriteImage = favoriteImages[indexPath.row]
-        guard let cell = tableView.cellForRow(at: indexPath) else { return }
+        guard let cell = tableView.cellForRow(at: indexPath) as? FavoriteTableViewCell  else { return }
         let photoDetailsVC = PhotoDetailsViewController()
         photoDetailsVC.modalPresentationStyle = .currentContext
         photoDetailsVC.photoDetails = favoriteImage
-        photoDetailsVC.image = cell.imageView!.image
+        photoDetailsVC.image = cell.photoImage.image
         self.navigationController?.pushViewController(photoDetailsVC, animated: true)
     }
     

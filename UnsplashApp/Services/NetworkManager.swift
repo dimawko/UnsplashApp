@@ -8,7 +8,7 @@
 import Foundation
 
 enum Link: String {
-    case randomPhoto = "https://api.unsplash.com/photos/random?count=5&client_id=jl7DJcBPGRgow1g6KiOaUQWU5ZRStIDPqXu5ZSJaJAM"
+    case randomPhoto = "https://api.unsplash.com/photos/random?count=30&client_id=jl7DJcBPGRgow1g6KiOaUQWU5ZRStIDPqXu5ZSJaJAM"
 }
 
 class NetworkManager {

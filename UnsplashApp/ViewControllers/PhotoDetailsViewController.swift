@@ -85,9 +85,9 @@ extension PhotoDetailsViewController {
 
     @objc func showInfo() {
         let userName = photoDetails.user?.name ?? "Unknown"
-        let creationDate = formatDate(from: photoDetails.createdAt ?? "Unknown")
+        let creationDate = formatDate(from: photoDetails.createdAt)
         let location = photoDetails.location?.title ?? "Unknown"
-        let downloads = String(photoDetails.downloads ?? 0)
+        let downloads = String(photoDetails.downloads)
         let alert = UIAlertController(
             title:
                 "Author: \(userName)",
