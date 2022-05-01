@@ -11,12 +11,14 @@ class FavoriteTableViewCell: UITableViewCell {
 
     static let indetifier = "FavoriteTableViewCell"
 
+    var representedIdentifier = ""
+
     var nameLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 24)
         label.textColor = .black
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.contentMode = .center
+        label.textAlignment = .center
 
         return label
     }()

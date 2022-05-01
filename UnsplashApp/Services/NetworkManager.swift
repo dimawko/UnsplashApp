@@ -15,6 +15,9 @@ class NetworkManager {
 
     static let shared = NetworkManager()
 
+    var images = NSCache<NSString, NSData>()
+    var imageDetails = NSCache<NSString, Image>()
+
     private init() {}
 
     func fetchData(completion: @escaping (Result<[Image], Error>) -> Void) {
@@ -26,6 +29,10 @@ class NetworkManager {
             }
             do {
                 let imageData = try JSONDecoder().decode([Image].self, from: data)
+                imageData.forEach { image in
+                    self.imageDetails.setObject(image, forKey: image.id as NSString)
+                    print(self.imageDetails)
+                }
                 completion(.success(imageData))
             } catch let error {
                 completion(.failure(error))
@@ -34,8 +41,13 @@ class NetworkManager {
     }
 
     func fetchImage(with imageData: Image, completion: @escaping(Result<Data, Error>) -> Void) {
-        guard let imageDataUrl = imageData.urls?.regular else { return }
-        guard let url = URL(string: imageDataUrl) else { return }
+        guard let imageUrl = imageData.urls?.regular else { return }
+        if let imageData = images.object(forKey: imageUrl as NSString) {
+            completion(.success(imageData as Data))
+            return
+        }
+
+        guard let url = URL(string: imageUrl) else { return }
         URLSession.shared.downloadTask(with: url) { localUrl, _, error in
             guard let localUrl = localUrl else {
                 print(error?.localizedDescription ?? "No error description")
@@ -43,6 +55,7 @@ class NetworkManager {
             }
             do {
                 let data = try Data(contentsOf: localUrl)
+                self.images.setObject(data as NSData, forKey: imageUrl as NSString)
                 completion(.success(data))
             } catch let error {
                 completion(.failure(error))

@@ -7,6 +7,7 @@
 
 import UIKit
 import RealmSwift
+import SwiftUI
 
 class PhotoDetailsViewController: UIViewController {
 
@@ -27,9 +28,7 @@ class PhotoDetailsViewController: UIViewController {
         view.backgroundColor = .white
         setupView()
         setupNavBar()
-        print(Realm.Configuration.defaultConfiguration.fileURL!)
     }
-
 
     private func setupView() {
         view.addSubview(imageView)
@@ -40,12 +39,12 @@ class PhotoDetailsViewController: UIViewController {
             imageView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             imageView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             imageView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
-
         ])
     }
 
     private func formatDate(from string: String) -> String {
         var convertedString = ""
+
         let dateFormatterGet = DateFormatter()
         dateFormatterGet.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZZZZZ"
 
@@ -63,6 +62,10 @@ class PhotoDetailsViewController: UIViewController {
 // MARK: - Set up navigation bar items
 extension PhotoDetailsViewController {
     private func setupNavBar() {
+        navigationItem.rightBarButtonItems = createBarButtonItems()
+    }
+
+    private func createBarButtonItems() -> [UIBarButtonItem] {
         let infoButton = UIBarButtonItem(
             image: UIImage(systemName: "info.circle"),
             style: .plain,
@@ -71,16 +74,41 @@ extension PhotoDetailsViewController {
         )
 
         let addToFavoritesButton = UIBarButtonItem(
-            image: UIImage(systemName: "heart.fill"),
+            image: UIImage(systemName: "heart"),
             style: .plain,
             target: self,
             action: #selector(addToFavorites)
         )
-        navigationItem.rightBarButtonItems = [addToFavoritesButton, infoButton]
+
+        let deleteFromFavoritesButton = UIBarButtonItem(
+            image: UIImage(systemName: "heart.fill"),
+            style: .plain,
+            target: self,
+            action: #selector(deleteFromFavorites)
+        )
+
+//        if photoDetails.isFavorite == true {
+//            return [deleteFromFavoritesButton, infoButton]
+//        } else {
+            return [addToFavoritesButton, deleteFromFavoritesButton]
+//        }
     }
 
     @objc func addToFavorites() {
         StorageManager.shared.save(photoDetails)
+//        navigationItem.rightBarButtonItems = createBarButtonItems()
+    }
+
+    @objc func deleteFromFavorites() {
+        StorageManager.shared.delete(photoDetails)
+//        navigationItem.rightBarButtonItems = createBarButtonItems()
+        let addToFavoritesButton = UIBarButtonItem(
+            image: UIImage(systemName: "heart"),
+            style: .plain,
+            target: self,
+            action: #selector(addToFavorites)
+        )
+//        navigationItem.rightBarButtonItem = addToFavoritesButton
     }
 
     @objc func showInfo() {

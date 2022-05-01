@@ -25,9 +25,41 @@ class StorageManager {
 
     func save(_ image: Image) {
         write {
-            realm?.add(image)
+            if let imageData = NetworkManager.shared.imageDetails.object(forKey: image.id as NSString) {
+                print("using cache details")
+                let copy = realm?.create(Image.self, value: imageData, update: .all)
+                realm?.add(copy!)
+                return
+            }
+            image.isFavorite = true
+            let copy = realm?.create(Image.self, value: image, update: .all)
+            realm?.add(copy!)
         }
     }
+
+    func delete(_ image: Image) {
+        if let deleteUrls = realm?.object(ofType: Urls.self, forPrimaryKey: image.urls?.regular) {
+            write{
+                realm?.delete(deleteUrls)
+            }
+        }
+        if let deleteUser = realm?.object(ofType: User.self, forPrimaryKey: image.user?.name) {
+            write {
+                realm?.delete(deleteUser)
+            }
+        }
+        if let deleteLocation  = realm?.object(ofType: Location.self, forPrimaryKey: image.location?.title) {
+            write {
+                realm?.delete(deleteLocation)
+            }
+        }
+        if let deleteData = realm?.object(ofType: Image.self, forPrimaryKey: image.id) {
+            write {
+                realm?.delete(deleteData)
+            }
+        }
+    }
+
 
     private func write(completion: () -> Void) {
         do {
