@@ -53,7 +53,7 @@ class FavoriteTableViewCell: UITableViewCell {
             photoImage.widthAnchor.constraint(equalToConstant: 100),
 
             nameLabel.centerYAnchor.constraint(equalTo: centerYAnchor),
-            nameLabel.trailingAnchor.constraint(equalTo: trailingAnchor),
+            nameLabel.trailingAnchor.constraint(equalTo: trailingAnchor)
         ])
     }
 }

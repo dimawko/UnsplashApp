@@ -8,6 +8,7 @@
 import Foundation
 import RealmSwift
 
+// swiftlint:disable redundant_optional_initialization
 class Image: Object, Codable {
     @Persisted(primaryKey: true) var id = ""
     @Persisted var createdAt = ""

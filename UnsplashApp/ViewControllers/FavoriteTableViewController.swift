@@ -15,11 +15,10 @@ class FavoriteTableViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        title = "Favorite"
+        setupTableView()
         favoriteImages = StorageManager.shared.realm?.objects(Image.self)
         print(Realm.Configuration.defaultConfiguration.fileURL!)
-        self.tableView.register(FavoriteTableViewCell.self, forCellReuseIdentifier: FavoriteTableViewCell.indetifier)
-        title = "Favorite"
-        tableView.rowHeight = 100
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -52,10 +51,10 @@ class FavoriteTableViewController: UITableViewController {
         NetworkManager.shared.fetchImage(with: favoriteImage) { result in
             switch result {
             case .success(let data):
-                let cellimage = self.getImage(from: data)
+                let image = UIImage(data: data)
                 DispatchQueue.main.async {
                     if cell.representedIdentifier == representerIdentifier {
-                        cell.photoImage.image = cellimage
+                        cell.photoImage.image = image
                     }
                 }
             case .failure(let error):
@@ -67,16 +66,19 @@ class FavoriteTableViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         guard let favoriteImage = favoriteImages?[indexPath.row] else { return }
+
         guard let cell = tableView.cellForRow(at: indexPath) as? FavoriteTableViewCell  else { return }
+
         let photoDetailsVC = PhotoDetailsViewController()
         photoDetailsVC.modalPresentationStyle = .currentContext
         photoDetailsVC.photoDetails = favoriteImage
         photoDetailsVC.image = cell.photoImage.image
+        
         self.navigationController?.pushViewController(photoDetailsVC, animated: true)
     }
-    
-    private func getImage(from data: Data?) -> UIImage? {
-        guard let data = data else { return UIImage(systemName: "picture") }
-        return UIImage(data: data)
+
+    private func setupTableView() {
+        self.tableView.register(FavoriteTableViewCell.self, forCellReuseIdentifier: FavoriteTableViewCell.indetifier)
+        tableView.rowHeight = 100
     }
 }

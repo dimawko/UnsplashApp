@@ -15,7 +15,7 @@ class PhotosCollectionViewController: UICollectionViewController, UICollectionVi
         super.viewDidLoad()
 
         title = "Photos"
-        self.collectionView!.register(PhotoCollectionViewCell.self, forCellWithReuseIdentifier: PhotoCollectionViewCell.identifier)
+        collectionView.register(PhotoCollectionViewCell.self, forCellWithReuseIdentifier: PhotoCollectionViewCell.identifier)
 
         getImageData()
     }
@@ -27,11 +27,11 @@ class PhotosCollectionViewController: UICollectionViewController, UICollectionVi
         layout.minimumInteritemSpacing = 1
         super.init(collectionViewLayout: layout)
     }
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
-    // MARK: UICollectionViewDataSource
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return images.count
     }
@@ -42,7 +42,7 @@ class PhotosCollectionViewController: UICollectionViewController, UICollectionVi
         NetworkManager.shared.fetchImage(with: image) { result in
             switch result {
             case .success(let data):
-                let cellimage = self.getImage(from: data)
+                let cellimage = UIImage(data: data)
                 DispatchQueue.main.async {
                     cell.imageView.image = cellimage
                 }
@@ -55,11 +55,14 @@ class PhotosCollectionViewController: UICollectionViewController, UICollectionVi
 
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let image = images[indexPath.row]
+
         guard let cell = collectionView.cellForItem(at: indexPath) as? PhotoCollectionViewCell else { return }
+
         let photoDetailsVC = PhotoDetailsViewController()
         photoDetailsVC.modalPresentationStyle = .currentContext
         photoDetailsVC.photoDetails = image
         photoDetailsVC.image = cell.imageView.image
+
         self.navigationController?.pushViewController(photoDetailsVC, animated: true)
     }
 
@@ -82,10 +85,5 @@ extension PhotosCollectionViewController {
                 print(error)
             }
         }
-    }
-
-    private func getImage(from data: Data?) -> UIImage? {
-        guard let data = data else { return UIImage(systemName: "picture") }
-        return UIImage(data: data)
     }
 }

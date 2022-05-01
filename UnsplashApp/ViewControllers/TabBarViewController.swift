@@ -20,12 +20,12 @@ class TabBarViewController: UITabBarController {
         let favoriteVC = UINavigationController(rootViewController: FavoriteTableViewController())
         photosVC.title = "Photos"
         favoriteVC.title = "Favorite"
-        self.setViewControllers([photosVC, favoriteVC], animated: true)
+        setViewControllers([photosVC, favoriteVC], animated: true)
 
         let images = ["photo", "heart.fill"]
-        guard let items = self.tabBar.items else { return }
-        for x in 0..<items.count {
-            items[x].image = UIImage(systemName: images[x])
+        guard let items = tabBar.items else { return }
+        for index in 0..<items.count {
+            items[index].image = UIImage(systemName: images[index])
         }
     }
 }

@@ -7,7 +7,7 @@
 
 import UIKit
 
-class UIBarButtonItemExtension: UIBarButtonItem {
+extension UIBarButtonItem {
 
     convenience init(with image: String, and action: Selector) {
         self.init(image: UIImage(systemName: image), style: .plain, target: UIViewController.self, action: action)

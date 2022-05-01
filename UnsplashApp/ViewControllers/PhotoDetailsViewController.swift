@@ -61,6 +61,7 @@ class PhotoDetailsViewController: UIViewController {
 
 // MARK: - Set up navigation bar items
 extension PhotoDetailsViewController {
+
     private func setupNavBar() {
         navigationItem.rightBarButtonItems = createBarButtonItems()
     }
@@ -72,43 +73,14 @@ extension PhotoDetailsViewController {
             target: self,
             action: #selector(showInfo)
         )
-
-        let addToFavoritesButton = UIBarButtonItem(
-            image: UIImage(systemName: "heart"),
-            style: .plain,
-            target: self,
-            action: #selector(addToFavorites)
-        )
-
-        let deleteFromFavoritesButton = UIBarButtonItem(
-            image: UIImage(systemName: "heart.fill"),
-            style: .plain,
-            target: self,
-            action: #selector(deleteFromFavorites)
-        )
-
-//        if photoDetails.isFavorite == true {
-//            return [deleteFromFavoritesButton, infoButton]
-//        } else {
-            return [addToFavoritesButton, deleteFromFavoritesButton]
-//        }
     }
 
     @objc func addToFavorites() {
         StorageManager.shared.save(photoDetails)
-//        navigationItem.rightBarButtonItems = createBarButtonItems()
     }
 
     @objc func deleteFromFavorites() {
         StorageManager.shared.delete(photoDetails)
-//        navigationItem.rightBarButtonItems = createBarButtonItems()
-        let addToFavoritesButton = UIBarButtonItem(
-            image: UIImage(systemName: "heart"),
-            style: .plain,
-            target: self,
-            action: #selector(addToFavorites)
-        )
-//        navigationItem.rightBarButtonItem = addToFavoritesButton
     }
 
     @objc func showInfo() {

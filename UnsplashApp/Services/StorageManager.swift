@@ -28,18 +28,20 @@ class StorageManager {
             if let imageData = NetworkManager.shared.imageDetails.object(forKey: image.id as NSString) {
                 print("using cache details")
                 let copy = realm?.create(Image.self, value: imageData, update: .all)
-                realm?.add(copy!)
+                guard let copy = copy else { return }
+                realm?.add(copy)
                 return
             }
             image.isFavorite = true
             let copy = realm?.create(Image.self, value: image, update: .all)
-            realm?.add(copy!)
+            guard let copy = copy else { return }
+            realm?.add(copy)
         }
     }
 
     func delete(_ image: Image) {
         if let deleteUrls = realm?.object(ofType: Urls.self, forPrimaryKey: image.urls?.regular) {
-            write{
+            write {
                 realm?.delete(deleteUrls)
             }
         }
@@ -59,7 +61,6 @@ class StorageManager {
             }
         }
     }
-
 
     private func write(completion: () -> Void) {
         do {
