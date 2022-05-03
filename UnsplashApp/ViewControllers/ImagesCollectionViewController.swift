@@ -17,11 +17,12 @@ class ImagesCollectionViewController: UICollectionViewController {
 
     private lazy var searchController: UISearchController = {
         let searchController = UISearchController(searchResultsController: nil)
-        searchController.searchResultsUpdater = self
         searchController.delegate = self
         searchController.searchBar.delegate = self
         searchController.obscuresBackgroundDuringPresentation = false
-        searchController.searchBar.showsCancelButton = true
+        searchController.searchBar.showsCancelButton = false
+        searchController.hidesNavigationBarDuringPresentation = true
+        searchController.searchBar.placeholder = "Search photos"
         return searchController
     }()
 
@@ -40,8 +41,7 @@ class ImagesCollectionViewController: UICollectionViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        title = "Photos"
-        navigationItem.searchController = searchController
+        setupNavBar()
         collectionView.register(ImageCollectionViewCell.self, forCellWithReuseIdentifier: ImageCollectionViewCell.identifier)
         getImageData()
     }
@@ -85,11 +85,13 @@ extension ImagesCollectionViewController: UICollectionViewDelegateFlowLayout {
     }
 
     override func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        let lastElement = images.count - 1
+        let lastElement = images.count - 5
         if indexPath.row == lastElement {
             isLoadNeeded = true
-            getImageData()
-            collectionView.reloadData()
+            DispatchQueue.main.async {
+                self.getImageData()
+                self.collectionView.reloadData()
+            }
         }
     }
 
@@ -105,12 +107,14 @@ extension ImagesCollectionViewController {
             switch result {
             case .success(let imageData):
                 if self.isLoadNeeded == false {
-                    self.images = imageData
                     DispatchQueue.main.async {
+                        self.images = imageData
                         self.collectionView.reloadData()
                     }
                 } else {
-                    self.images.append(contentsOf: imageData)
+                    DispatchQueue.main.async {
+                        self.images.append(contentsOf: imageData)
+                    }
                 }
             case .failure(let error):
                 print(error)
@@ -119,26 +123,43 @@ extension ImagesCollectionViewController {
     }
 }
 
-// MARK: - UISearchController
-extension ImagesCollectionViewController: UISearchResultsUpdating, UISearchControllerDelegate, UISearchBarDelegate {
-    func updateSearchResults(for searchController: UISearchController) {
+// MARK: - Search bar methods
+extension ImagesCollectionViewController: UISearchControllerDelegate, UISearchBarDelegate, UITextFieldDelegate {
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         guard let searchText = searchController.searchBar.text else { return }
-        if searchText.isEmpty {
-            isSearching = false
-            collectionView.reloadData()
-        } else {
-            isSearching = true
-            NetworkManager.shared.fetchImageData(dataType: SearchResults.self, url: LinkString.searchPhoto, query: "query=\(searchText)") { result in
-                switch result {
-                case .success(let searchResults):
-                    DispatchQueue.main.async {
-                        self.searchImages = searchResults.results
-                        self.collectionView.reloadData()
-                    }
-                case .failure(let error):
-                    print(error)
+
+        isSearching = true
+        NetworkManager.shared.fetchImageData(dataType: SearchResults.self, url: LinkString.searchPhoto, query: "query=\(searchText)") { result in
+            switch result {
+            case .success(let searchResults):
+                DispatchQueue.main.async {
+                    self.searchImages = searchResults.results
+                    self.collectionView.reloadData()
                 }
+            case .failure(let error):
+                print(error)
             }
         }
+    }
+
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        guard let searchText = searchController.searchBar.text else { return }
+        if searchText.isEmpty {
+            DispatchQueue.main.async {
+                searchBar.resignFirstResponder()
+                self.isSearching = false
+                self.collectionView.reloadData()
+            }
+        }
+    }
+}
+
+// MARK: - Private methods
+private extension ImagesCollectionViewController {
+    func setupNavBar() {
+        title = "Photos"
+        navigationItem.searchController = searchController
+        navigationItem.hidesSearchBarWhenScrolling = false
+        navigationController?.navigationBar.prefersLargeTitles = true
     }
 }

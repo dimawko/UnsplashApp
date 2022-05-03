@@ -29,12 +29,14 @@ class ImageDetailsViewController: UIViewController {
         target: self,
         action: #selector(showImageDetailsAlert)
     )
+
     private lazy var addToFavoritesButton = UIBarButtonItem(
         image: UIImage(systemName: "heart"),
         style: .plain,
         target: self,
         action: #selector(addToFavorites)
     )
+    
     private lazy var deleteFromFavoritesButton = UIBarButtonItem(
         image: UIImage(systemName: "heart.fill"),
         style: .plain,
@@ -95,6 +97,7 @@ extension ImageDetailsViewController {
         let creationDate = formatDate(from: imageDetails.createdAt ?? "Unknown")
         let location = imageDetails.location?.title ?? "Unknown"
         let downloads = String(imageDetails.downloads ?? 0)
+
         let alert = UIAlertController(
             title: "Author: \(userName)",
             message: "Created: \(String(describing: creationDate))\n Location: \(location)\n Downloads: \(downloads)",
@@ -102,6 +105,7 @@ extension ImageDetailsViewController {
         )
 
         let okAction = UIAlertAction(title: "OK", style: .default)
+
         alert.addAction(okAction)
         present(alert, animated: true)
     }
@@ -131,8 +135,9 @@ private extension ImageDetailsViewController {
         dateFormatterSet.dateFormat = "MMM dd, yyyy"
         dateFormatterSet.locale = Locale(identifier: "en_US_POSIX")
 
-        guard let date = dateFormatterGet.date(from: string) else { return "" }
-        convertedString = dateFormatterSet.string(from: date)
+        if let date = dateFormatterGet.date(from: string) {
+            convertedString = dateFormatterSet.string(from: date)
+        }
 
         return convertedString
     }
