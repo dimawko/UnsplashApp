@@ -18,6 +18,10 @@ class ImageCollectionViewCell: UICollectionViewCell {
         return imageView
     }()
 
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
     override init(frame: CGRect) {
         super.init(frame: frame)
         contentView.addSubview(imageView)
@@ -25,10 +29,6 @@ class ImageCollectionViewCell: UICollectionViewCell {
 
     override func layoutSubviews() {
         imageView.frame = contentView.bounds
-    }
-
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
     }
 
     override func prepareForReuse() {

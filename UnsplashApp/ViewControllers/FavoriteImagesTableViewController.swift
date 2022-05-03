@@ -27,8 +27,7 @@ class FavoriteImagesTableViewController: UITableViewController {
         tableView.reloadData()
     }
 
-    // MARK: - Table view data source
-
+    // MARK: - Table view data source and delegate methods
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return favoriteImages?.count ?? 0
     }
@@ -76,8 +75,11 @@ class FavoriteImagesTableViewController: UITableViewController {
 
         self.navigationController?.pushViewController(imageDetailsVC, animated: true)
     }
+}
 
-    private func setupTableView() {
+// MARK: - Private methods
+private extension FavoriteImagesTableViewController {
+    func setupTableView() {
         self.tableView.register(FavoriteImageTableViewCell.self, forCellReuseIdentifier: FavoriteImageTableViewCell.indetifier)
         tableView.rowHeight = 100
     }

@@ -9,9 +9,8 @@ import Foundation
 import RealmSwift
 
 class StorageManager {
-    static let shared = StorageManager()
 
-    private init() {}
+    static let shared = StorageManager()
 
     var realm: Realm? {
         do {
@@ -22,6 +21,8 @@ class StorageManager {
         }
         return nil
     }
+
+    private init() {}
 
     func save(_ image: Image) {
         write {
@@ -37,16 +38,19 @@ class StorageManager {
                 realm?.delete(deleteUrls)
             }
         }
+
         if let deleteUser = realm?.object(ofType: User.self, forPrimaryKey: image.user?.name) {
             write {
                 realm?.delete(deleteUser)
             }
         }
+
         if let deleteLocation  = realm?.object(ofType: Location.self, forPrimaryKey: image.location?.title) {
             write {
                 realm?.delete(deleteLocation)
             }
         }
+
         if let deleteData = realm?.object(ofType: Image.self, forPrimaryKey: image.id) {
             write {
                 realm?.delete(deleteData)

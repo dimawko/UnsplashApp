@@ -7,8 +7,9 @@
 
 import UIKit
 
-class ImagesCollectionViewController: UICollectionViewController, UICollectionViewDelegateFlowLayout {
+class ImagesCollectionViewController: UICollectionViewController {
 
+    // MARK: - Private properties
     private var images: [Image] = []
     private var searchImages: [Image] = []
     private var isSearching = false
@@ -21,7 +22,6 @@ class ImagesCollectionViewController: UICollectionViewController, UICollectionVi
         searchController.searchBar.delegate = self
         searchController.obscuresBackgroundDuringPresentation = false
         searchController.searchBar.showsCancelButton = true
-
         return searchController
     }()
 
@@ -41,12 +41,14 @@ class ImagesCollectionViewController: UICollectionViewController, UICollectionVi
         super.viewDidLoad()
 
         title = "Photos"
-        collectionView.register(ImageCollectionViewCell.self, forCellWithReuseIdentifier: ImageCollectionViewCell.identifier)
-
-        getImageData()
         navigationItem.searchController = searchController
+        collectionView.register(ImageCollectionViewCell.self, forCellWithReuseIdentifier: ImageCollectionViewCell.identifier)
+        getImageData()
     }
+}
 
+// MARK: - Collection view data source and delegate methods
+extension ImagesCollectionViewController: UICollectionViewDelegateFlowLayout {
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         isSearching ? searchImages.count : images.count
     }
@@ -99,7 +101,7 @@ class ImagesCollectionViewController: UICollectionViewController, UICollectionVi
 // MARK: - Networking
 extension ImagesCollectionViewController {
     private func getImageData() {
-        NetworkManager.shared.fetchData { result in
+        NetworkManager.shared.fetchImageData(dataType: [Image].self, url: LinkString.randomPhoto, query: "count=30") { result in
             switch result {
             case .success(let imageData):
                 if self.isLoadNeeded == false {
@@ -117,8 +119,8 @@ extension ImagesCollectionViewController {
     }
 }
 
+// MARK: - UISearchController
 extension ImagesCollectionViewController: UISearchResultsUpdating, UISearchControllerDelegate, UISearchBarDelegate {
-
     func updateSearchResults(for searchController: UISearchController) {
         guard let searchText = searchController.searchBar.text else { return }
         if searchText.isEmpty {
@@ -126,8 +128,8 @@ extension ImagesCollectionViewController: UISearchResultsUpdating, UISearchContr
             collectionView.reloadData()
         } else {
             isSearching = true
-            NetworkManager.shared.fetchSearchResults(with: searchText.lowercased()) { results in
-                switch results {
+            NetworkManager.shared.fetchImageData(dataType: SearchResults.self, url: LinkString.searchPhoto, query: "query=\(searchText)") { result in
+                switch result {
                 case .success(let searchResults):
                     DispatchQueue.main.async {
                         self.searchImages = searchResults.results

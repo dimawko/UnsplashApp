@@ -87,8 +87,8 @@
 			children = (
 				C2ADF7022819E2E500D718E1 /* TabBarViewController.swift */,
 				C2ADF7042819E2EC00D718E1 /* ImagesCollectionViewController.swift */,
-				C2ADD5A02819C88700DC77AA /* FavoriteImagesTableViewController.swift */,
 				C2D6E77F281A8B0B00135BB8 /* ImageDetailsViewController.swift */,
+				C2ADD5A02819C88700DC77AA /* FavoriteImagesTableViewController.swift */,
 			);
 			path = ViewControllers;
 			sourceTree = "<group>";

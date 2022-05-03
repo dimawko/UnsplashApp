@@ -16,7 +16,7 @@ struct SearchResults: Codable {
 
 class Image: Object, Codable {
     @Persisted(primaryKey: true) var id = ""
-    @Persisted var createdAt = ""
+    @Persisted var createdAt: String? = ""
     @Persisted var urls: Urls? = nil
     @Persisted var likes = 0
     @Persisted var user: User? = nil
