@@ -7,11 +7,10 @@
 
 import UIKit
 import RealmSwift
-import SwiftUI
 
-class PhotoDetailsViewController: UIViewController {
+class ImageDetailsViewController: UIViewController {
 
-    var photoDetails: Image!
+    var imageDetails: Image!
     var image: UIImage!
 
     private lazy var imageView: UIImageView = {
@@ -22,11 +21,35 @@ class PhotoDetailsViewController: UIViewController {
         return imageView
     }()
 
+    private lazy var showImageDetailsButton = UIBarButtonItem(
+        image: UIImage(systemName: "info.circle"),
+        style: .plain,
+        target: self,
+        action: #selector(showImageDetailsAlert)
+    )
+    private lazy var addToFavoritesButton = UIBarButtonItem(
+        image: UIImage(systemName: "heart"),
+        style: .plain,
+        target: self,
+        action: #selector(addToFavorites)
+    )
+    private lazy var deleteFromFavoritesButton = UIBarButtonItem(
+        image: UIImage(systemName: "heart.fill"),
+        style: .plain,
+        target: self,
+        action: #selector(deleteFromFavorites)
+    )
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
         view.backgroundColor = .white
         setupView()
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+
         setupNavBar()
     }
 
@@ -60,34 +83,44 @@ class PhotoDetailsViewController: UIViewController {
 }
 
 // MARK: - Set up navigation bar items
-extension PhotoDetailsViewController {
+extension ImageDetailsViewController {
 
-    private func setupNavBar() {
-        navigationItem.rightBarButtonItems = createBarButtonItems()
+    private func isImageFavorite() -> Bool {
+        var isFavorite = false
+        let realmImage = StorageManager.shared.realm?.object(ofType: Image.self, forPrimaryKey: imageDetails.id)
+        if realmImage != nil {
+            isFavorite = true
+        }
+        return isFavorite
     }
 
-    private func createBarButtonItems() -> [UIBarButtonItem] {
-        let infoButton = UIBarButtonItem(
-            image: UIImage(systemName: "info.circle"),
-            style: .plain,
-            target: self,
-            action: #selector(showInfo)
-        )
+    private func configureBarButtonItems() -> [UIBarButtonItem] {
+        if isImageFavorite() == true {
+            return [deleteFromFavoritesButton, showImageDetailsButton]
+        } else {
+            return [addToFavoritesButton, showImageDetailsButton]
+        }
+    }
+
+    private func setupNavBar() {
+        navigationItem.rightBarButtonItems = configureBarButtonItems()
     }
 
     @objc func addToFavorites() {
-        StorageManager.shared.save(photoDetails)
+        StorageManager.shared.save(imageDetails)
+        navigationItem.rightBarButtonItem = deleteFromFavoritesButton
     }
 
     @objc func deleteFromFavorites() {
-        StorageManager.shared.delete(photoDetails)
+        StorageManager.shared.delete(imageDetails)
+        navigationItem.rightBarButtonItem = addToFavoritesButton
     }
 
-    @objc func showInfo() {
-        let userName = photoDetails.user?.name ?? "Unknown"
-        let creationDate = formatDate(from: photoDetails.createdAt)
-        let location = photoDetails.location?.title ?? "Unknown"
-        let downloads = String(photoDetails.downloads)
+    @objc func showImageDetailsAlert() {
+        let userName = imageDetails.user?.name ?? "Unknown"
+        let creationDate = formatDate(from: imageDetails.createdAt)
+        let location = imageDetails.location?.title ?? "Unknown"
+        let downloads = String(imageDetails.downloads ?? 0)
         let alert = UIAlertController(
             title:
                 "Author: \(userName)",

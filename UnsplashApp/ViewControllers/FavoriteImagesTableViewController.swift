@@ -8,7 +8,7 @@
 import UIKit
 import RealmSwift
 
-class FavoriteTableViewController: UITableViewController {
+class FavoriteImagesTableViewController: UITableViewController {
 
     private var favoriteImages: Results<Image>? = nil
 
@@ -35,8 +35,8 @@ class FavoriteTableViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(
-            withIdentifier: FavoriteTableViewCell.indetifier,
-            for: indexPath) as? FavoriteTableViewCell else {
+            withIdentifier: FavoriteImageTableViewCell.indetifier,
+            for: indexPath) as? FavoriteImageTableViewCell else {
             return UITableViewCell()
         }
 
@@ -65,20 +65,20 @@ class FavoriteTableViewController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        guard let favoriteImage = favoriteImages?[indexPath.row] else { return }
+        guard let favoriteImageDetails = favoriteImages?[indexPath.row] else { return }
 
-        guard let cell = tableView.cellForRow(at: indexPath) as? FavoriteTableViewCell  else { return }
+        guard let cell = tableView.cellForRow(at: indexPath) as? FavoriteImageTableViewCell  else { return }
 
-        let photoDetailsVC = PhotoDetailsViewController()
-        photoDetailsVC.modalPresentationStyle = .currentContext
-        photoDetailsVC.photoDetails = favoriteImage
-        photoDetailsVC.image = cell.photoImage.image
-        
-        self.navigationController?.pushViewController(photoDetailsVC, animated: true)
+        let imageDetailsVC = ImageDetailsViewController()
+        imageDetailsVC.modalPresentationStyle = .currentContext
+        imageDetailsVC.imageDetails = favoriteImageDetails
+        imageDetailsVC.image = cell.photoImage.image
+
+        self.navigationController?.pushViewController(imageDetailsVC, animated: true)
     }
 
     private func setupTableView() {
-        self.tableView.register(FavoriteTableViewCell.self, forCellReuseIdentifier: FavoriteTableViewCell.indetifier)
+        self.tableView.register(FavoriteImageTableViewCell.self, forCellReuseIdentifier: FavoriteImageTableViewCell.indetifier)
         tableView.rowHeight = 100
     }
 }

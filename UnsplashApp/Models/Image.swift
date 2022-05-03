@@ -9,6 +9,11 @@ import Foundation
 import RealmSwift
 
 // swiftlint:disable redundant_optional_initialization
+
+struct SearchResults: Codable {
+    let results: [Image]
+}
+
 class Image: Object, Codable {
     @Persisted(primaryKey: true) var id = ""
     @Persisted var createdAt = ""
@@ -16,8 +21,7 @@ class Image: Object, Codable {
     @Persisted var likes = 0
     @Persisted var user: User? = nil
     @Persisted var location: Location? = nil
-    @Persisted var downloads = 0
-    @Persisted var isFavorite = false
+    @Persisted var downloads: Int? = 0
 
     enum CodingKeys: String, CodingKey {
         case createdAt = "created_at"

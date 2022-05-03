@@ -25,14 +25,6 @@ class StorageManager {
 
     func save(_ image: Image) {
         write {
-            if let imageData = NetworkManager.shared.imageDetails.object(forKey: image.id as NSString) {
-                print("using cache details")
-                let copy = realm?.create(Image.self, value: imageData, update: .all)
-                guard let copy = copy else { return }
-                realm?.add(copy)
-                return
-            }
-            image.isFavorite = true
             let copy = realm?.create(Image.self, value: image, update: .all)
             guard let copy = copy else { return }
             realm?.add(copy)

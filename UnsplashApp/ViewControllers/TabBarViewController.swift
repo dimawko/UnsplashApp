@@ -16,14 +16,14 @@ class TabBarViewController: UITabBarController {
     }
 
     private func setupTabBar() {
-        let photosVC = UINavigationController(rootViewController: PhotosCollectionViewController())
-        let favoriteVC = UINavigationController(rootViewController: FavoriteTableViewController())
+        let photosVC = UINavigationController(rootViewController: ImagesCollectionViewController())
+        let favoriteVC = UINavigationController(rootViewController: FavoriteImagesTableViewController())
         photosVC.title = "Photos"
         favoriteVC.title = "Favorite"
-        setViewControllers([photosVC, favoriteVC], animated: true)
+        self.setViewControllers([photosVC, favoriteVC], animated: true)
 
         let images = ["photo", "heart.fill"]
-        guard let items = tabBar.items else { return }
+        guard let items = self.tabBar.items else { return }
         for index in 0..<items.count {
             items[index].image = UIImage(systemName: images[index])
         }

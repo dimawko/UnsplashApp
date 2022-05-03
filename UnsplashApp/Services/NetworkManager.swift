@@ -9,6 +9,7 @@ import Foundation
 
 enum Link: String {
     case randomPhoto = "https://api.unsplash.com/photos/random?count=30&client_id=jl7DJcBPGRgow1g6KiOaUQWU5ZRStIDPqXu5ZSJaJAM"
+    case searchPhoto = "https://api.unsplash.com/search/photos?query=space&&client_id=jl7DJcBPGRgow1g6KiOaUQWU5ZRStIDPqXu5ZSJaJAM"
 }
 
 class NetworkManager {
@@ -16,7 +17,6 @@ class NetworkManager {
     static let shared = NetworkManager()
 
     var images = NSCache<NSString, NSData>()
-    var imageDetails = NSCache<NSString, Image>()
 
     private init() {}
 
@@ -29,10 +29,6 @@ class NetworkManager {
             }
             do {
                 let imageData = try JSONDecoder().decode([Image].self, from: data)
-                imageData.forEach { image in
-                    self.imageDetails.setObject(image, forKey: image.id as NSString)
-                    print(self.imageDetails)
-                }
                 completion(.success(imageData))
             } catch let error {
                 completion(.failure(error))
@@ -57,6 +53,38 @@ class NetworkManager {
                 let data = try Data(contentsOf: localUrl)
                 self.images.setObject(data as NSData, forKey: imageUrl as NSString)
                 completion(.success(data))
+            } catch let error {
+                completion(.failure(error))
+            }
+        }.resume()
+    }
+
+    func fetchSearchResults(with query: String, completion: @escaping (Result<SearchResults, Error>) -> Void) {
+        guard let url = URL(string: "https://api.unsplash.com/search/photos?query=\(query)&client_id=jl7DJcBPGRgow1g6KiOaUQWU5ZRStIDPqXu5ZSJaJAM") else { return }
+        URLSession.shared.dataTask(with: url) { data, _, error in
+            guard let data = data else {
+                print(error?.localizedDescription ?? "No error description")
+                return
+            }
+            do {
+                let searchData = try JSONDecoder().decode(SearchResults.self, from: data)
+                completion(.success(searchData))
+            } catch let error {
+                completion(.failure(error))
+            }
+        }.resume()
+    }
+
+    func fetchDatas<T: Decodable>(url: String, query: String, completion: @escaping (Result<T, Error>) -> Void) {
+        guard let url = URL(string: "https://api.unsplash.com/search/photos?query=\(query)&client_id=jl7DJcBPGRgow1g6KiOaUQWU5ZRStIDPqXu5ZSJaJAM") else { return }
+        URLSession.shared.dataTask(with: url) { data, _, error in
+            guard let data = data else {
+                print(error?.localizedDescription ?? "No error description")
+                return
+            }
+            do {
+                let searchData = try JSONDecoder().decode(T.self, from: data)
+                completion(.success(searchData))
             } catch let error {
                 completion(.failure(error))
             }

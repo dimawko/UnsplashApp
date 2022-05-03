@@ -7,7 +7,7 @@
 
 import UIKit
 
-class FavoriteTableViewCell: UITableViewCell {
+class FavoriteImageTableViewCell: UITableViewCell {
 
     static let indetifier = "FavoriteTableViewCell"
 
