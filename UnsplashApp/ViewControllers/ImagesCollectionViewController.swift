@@ -56,12 +56,15 @@ extension ImagesCollectionViewController: UICollectionViewDelegateFlowLayout {
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ImageCollectionViewCell.identifier, for: indexPath) as? ImageCollectionViewCell else { return UICollectionViewCell() }
         let image = isSearching ? searchImages[indexPath.row] : images[indexPath.row]
-        NetworkManager.shared.fetchImage(with: image) { result in
+        cell.spinner.startAnimating()
+
+        NetworkManager.shared.fetchImage(imageType: .small, imageData: image) { result in
             switch result {
             case .success(let data):
-                let cellimage = UIImage(data: data)
                 DispatchQueue.main.async {
+                    let cellimage = UIImage(data: data)
                     cell.imageView.image = cellimage
+                    cell.spinner.stopAnimating()
                 }
             case .failure(let error):
                 print(error)
@@ -74,24 +77,19 @@ extension ImagesCollectionViewController: UICollectionViewDelegateFlowLayout {
         searchController.searchBar.endEditing(true)
         let imageDetails = isSearching ? searchImages[indexPath.row] : images[indexPath.row]
 
-        guard let cell = collectionView.cellForItem(at: indexPath) as? ImageCollectionViewCell else { return }
-
         let imageDetailsVC = ImageDetailsViewController()
         imageDetailsVC.modalPresentationStyle = .currentContext
         imageDetailsVC.imageDetails = imageDetails
-        imageDetailsVC.image = cell.imageView.image
 
         self.navigationController?.pushViewController(imageDetailsVC, animated: true)
     }
 
     override func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        let lastElement = images.count - 5
+        let lastElement = images.count - 1
         if indexPath.row == lastElement {
+            print("will Display cell")
             isLoadNeeded = true
-            DispatchQueue.main.async {
-                self.getImageData()
-                self.collectionView.reloadData()
-            }
+            getMoreImageData()
         }
     }
 
@@ -106,14 +104,25 @@ extension ImagesCollectionViewController {
         NetworkManager.shared.fetchImageData(dataType: [Image].self, url: LinkString.randomPhoto, query: "count=30") { result in
             switch result {
             case .success(let imageData):
-                if self.isLoadNeeded == false {
-                    DispatchQueue.main.async {
-                        self.images = imageData
-                        self.collectionView.reloadData()
-                    }
-                } else {
+                DispatchQueue.main.async {
+                    self.images = imageData
+                    self.collectionView.reloadData()
+                }
+            case .failure(let error):
+                print(error)
+            }
+        }
+    }
+
+    private func getMoreImageData() {
+        NetworkManager.shared.fetchImageData(dataType: [Image].self, url: LinkString.randomPhoto, query: "count=30") { result in
+            switch result {
+            case .success(let imageData):
+                if self.isLoadNeeded == true {
                     DispatchQueue.main.async {
                         self.images.append(contentsOf: imageData)
+                        self.collectionView.reloadData()
+                        self.isLoadNeeded = false
                     }
                 }
             case .failure(let error):
@@ -134,7 +143,6 @@ extension ImagesCollectionViewController: UISearchControllerDelegate, UISearchBa
             case .success(let searchResults):
                 DispatchQueue.main.async {
                     self.searchImages = searchResults.results
-                    self.collectionView.reloadData()
                 }
             case .failure(let error):
                 print(error)

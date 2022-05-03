@@ -12,15 +12,20 @@ class ImageDetailsViewController: UIViewController {
 
     // MARK: - Public properties
     var imageDetails: Image!
-    var image: UIImage!
 
     // MARK: - Private properties
     private lazy var imageView: UIImageView = {
         let imageView = UIImageView()
-        imageView.image = image
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.contentMode = .scaleAspectFit
         return imageView
+    }()
+
+    private lazy var spinner: UIActivityIndicatorView = {
+        let spinner = UIActivityIndicatorView()
+        spinner.hidesWhenStopped = true
+        spinner.style = .large
+        return spinner
     }()
 
     private lazy var showImageDetailsButton = UIBarButtonItem(
@@ -48,11 +53,17 @@ class ImageDetailsViewController: UIViewController {
         super.viewDidLoad()
 
         view.backgroundColor = .white
+        getImageWithHighResolution()
         setupView()
+    }
+
+    override func viewWillLayoutSubviews() {
+        spinner.center = view.center
     }
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        print(imageView.frame.size.width)
 
         setupNavBar()
     }
@@ -115,7 +126,7 @@ extension ImageDetailsViewController {
 private extension ImageDetailsViewController {
     func setupView() {
         view.addSubview(imageView)
-        imageView.image = image
+        view.addSubview(spinner)
 
         NSLayoutConstraint.activate([
             imageView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -140,5 +151,20 @@ private extension ImageDetailsViewController {
         }
 
         return convertedString
+    }
+
+    func getImageWithHighResolution() {
+        spinner.startAnimating()
+        NetworkManager.shared.fetchImage(imageType: .regular, imageData: imageDetails) { result in
+            switch result {
+            case .success(let imageData):
+                DispatchQueue.main.async {
+                    self.imageView.image = UIImage(data: imageData)
+                    self.spinner.stopAnimating()
+                }
+            case .failure(let error):
+                print(error)
+            }
+        }
     }
 }

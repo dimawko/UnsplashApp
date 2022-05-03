@@ -13,22 +13,36 @@ enum LinkString {
     static let apiKey = "&client_id=jl7DJcBPGRgow1g6KiOaUQWU5ZRStIDPqXu5ZSJaJAM"
 }
 
+enum ImageType {
+    case small
+    case regular
+}
+
 final class NetworkManager {
 
     static let shared = NetworkManager()
-    var images = NSCache<NSString, NSData>()
+    var cachedImages = NSCache<NSString, NSData>()
 
     private init() {}
 
-    func fetchImage(with imageData: Image, completion: @escaping(Result<Data, Error>) -> Void) {
+    func fetchImage(imageType: ImageType, imageData: Image, completion: @escaping(Result<Data, Error>) -> Void) {
+        var imageUrl = ""
+        guard let imageDataUrls = imageData.urls else { return }
+
+        switch imageType {
+        case .small:
+            imageUrl = imageDataUrls.small
+
+        case .regular:
+            imageUrl = imageDataUrls.regular
+        }
         // MARK: - Checking if the image is already in a cache
-        guard let imageUrl = imageData.urls?.regular else { return }
-        if let imageData = images.object(forKey: imageUrl as NSString) {
+        if let imageData = cachedImages.object(forKey: imageUrl as NSString) {
             completion(.success(imageData as Data))
             return
         }
 
-        // MARK: - Download image, If its not in the cache
+        // MARK: - Download image, if its not in the cache
         guard let url = URL(string: imageUrl) else { return }
         URLSession.shared.downloadTask(with: url) { localUrl, _, error in
             guard let localUrl = localUrl else {
@@ -37,7 +51,7 @@ final class NetworkManager {
             }
             do {
                 let data = try Data(contentsOf: localUrl)
-                self.images.setObject(data as NSData, forKey: imageUrl as NSString)
+                self.cachedImages.setObject(data as NSData, forKey: imageUrl as NSString)
                 completion(.success(data))
             } catch let error {
                 completion(.failure(error))

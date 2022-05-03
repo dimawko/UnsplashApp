@@ -9,7 +9,6 @@ import Foundation
 import RealmSwift
 
 // swiftlint:disable redundant_optional_initialization
-
 struct SearchResults: Codable {
     let results: [Image]
 }
@@ -31,6 +30,7 @@ class Image: Object, Codable {
 
 class Urls: Object, Codable {
     @Persisted(primaryKey: true) var regular = ""
+    @Persisted var small = ""
 }
 
 class User: Object, Codable {

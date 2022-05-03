@@ -47,7 +47,7 @@ class FavoriteImagesTableViewController: UITableViewController {
         let representerIdentifier = favoriteImage.id
         cell.representedIdentifier = representerIdentifier
 
-        NetworkManager.shared.fetchImage(with: favoriteImage) { result in
+        NetworkManager.shared.fetchImage(imageType: .small, imageData: favoriteImage) { result in
             switch result {
             case .success(let data):
                 let image = UIImage(data: data)
@@ -66,12 +66,9 @@ class FavoriteImagesTableViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         guard let favoriteImageDetails = favoriteImages?[indexPath.row] else { return }
 
-        guard let cell = tableView.cellForRow(at: indexPath) as? FavoriteImageTableViewCell  else { return }
-
         let imageDetailsVC = ImageDetailsViewController()
         imageDetailsVC.modalPresentationStyle = .currentContext
         imageDetailsVC.imageDetails = favoriteImageDetails
-        imageDetailsVC.image = cell.photoImage.image
 
         self.navigationController?.pushViewController(imageDetailsVC, animated: true)
     }
