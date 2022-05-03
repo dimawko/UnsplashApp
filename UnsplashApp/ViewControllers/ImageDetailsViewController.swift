@@ -36,7 +36,7 @@ class ImageDetailsViewController: UIViewController {
         target: self,
         action: #selector(addToFavorites)
     )
-    
+
     private lazy var deleteFromFavoritesButton = UIBarButtonItem(
         image: UIImage(systemName: "heart.fill"),
         style: .plain,

@@ -13,7 +13,7 @@ enum LinkString {
     static let apiKey = "&client_id=jl7DJcBPGRgow1g6KiOaUQWU5ZRStIDPqXu5ZSJaJAM"
 }
 
-class NetworkManager {
+final class NetworkManager {
 
     static let shared = NetworkManager()
     var images = NSCache<NSString, NSData>()
