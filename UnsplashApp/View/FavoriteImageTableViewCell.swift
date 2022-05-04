@@ -7,7 +7,7 @@
 
 import UIKit
 
-class FavoriteImageTableViewCell: UITableViewCell {
+final class FavoriteImageTableViewCell: UITableViewCell {
 
     static let indetifier = "FavoriteTableViewCell"
 
@@ -23,12 +23,10 @@ class FavoriteImageTableViewCell: UITableViewCell {
         return label
     }()
 
-    var photoImage: UIImageView = {
-        let imageView = UIImageView()
-        imageView.contentMode = .scaleAspectFill
-        imageView.clipsToBounds = true
-        imageView.translatesAutoresizingMaskIntoConstraints = false
-        return imageView
+    var photoView: PhotoView = {
+        let photoView = PhotoView()
+        photoView.imageView.layer.cornerRadius = 10
+        return photoView
     }()
 
     required init?(coder: NSCoder) {
@@ -42,14 +40,14 @@ class FavoriteImageTableViewCell: UITableViewCell {
 
     private func setupCell() {
         addSubview(nameLabel)
-        addSubview(photoImage)
+        addSubview(photoView)
 
         NSLayoutConstraint.activate([
-            photoImage.leadingAnchor.constraint(equalTo: leadingAnchor),
-            photoImage.topAnchor.constraint(equalTo: topAnchor),
-            photoImage.trailingAnchor.constraint(equalTo: nameLabel.leadingAnchor),
-            photoImage.bottomAnchor.constraint(equalTo: bottomAnchor),
-            photoImage.widthAnchor.constraint(equalToConstant: 100),
+            photoView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 5),
+            photoView.topAnchor.constraint(equalTo: topAnchor, constant: 5),
+            photoView.trailingAnchor.constraint(equalTo: nameLabel.leadingAnchor),
+            photoView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -5),
+            photoView.widthAnchor.constraint(equalToConstant: 100),
 
             nameLabel.centerYAnchor.constraint(equalTo: centerYAnchor),
             nameLabel.trailingAnchor.constraint(equalTo: trailingAnchor)

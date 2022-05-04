@@ -12,20 +12,13 @@ class ImageDetailsViewController: UIViewController {
 
     // MARK: - Public properties
     var imageDetails: Image!
+    private var deleteNeeded = false
 
     // MARK: - Private properties
-    private lazy var imageView: UIImageView = {
-        let imageView = UIImageView()
-        imageView.translatesAutoresizingMaskIntoConstraints = false
-        imageView.contentMode = .scaleAspectFit
-        return imageView
-    }()
-
-    private lazy var spinner: UIActivityIndicatorView = {
-        let spinner = UIActivityIndicatorView()
-        spinner.hidesWhenStopped = true
-        spinner.style = .large
-        return spinner
+    private lazy var photoView: PhotoView = {
+        let photoView = PhotoView()
+        photoView.imageView.contentMode = .scaleAspectFit
+        return photoView
     }()
 
     private lazy var showImageDetailsButton = UIBarButtonItem(
@@ -35,13 +28,6 @@ class ImageDetailsViewController: UIViewController {
         action: #selector(showImageDetailsAlert)
     )
 
-    private lazy var addToFavoritesButton = UIBarButtonItem(
-        image: UIImage(systemName: "heart"),
-        style: .plain,
-        target: self,
-        action: #selector(addToFavorites)
-    )
-
     private lazy var deleteFromFavoritesButton = UIBarButtonItem(
         image: UIImage(systemName: "heart.fill"),
         style: .plain,
@@ -49,29 +35,33 @@ class ImageDetailsViewController: UIViewController {
         action: #selector(deleteFromFavorites)
     )
 
+    private lazy var addToFavoritesButton = UIBarButtonItem(
+        image: UIImage(systemName: "heart"),
+        style: .plain,
+        target: self,
+        action: #selector(addToFavorites)
+    )
+
     override func viewDidLoad() {
         super.viewDidLoad()
-
         view.backgroundColor = .white
         getImageWithHighResolution()
         setupView()
     }
 
-    override func viewWillLayoutSubviews() {
-        spinner.center = view.center
-    }
-
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        print(imageView.frame.size.width)
+        configureBarButtonItems()
+    }
 
-        setupNavBar()
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        deleteFromFavoritesIfNeeded()
     }
 }
 
 // MARK: - Set up navigation bar items
 extension ImageDetailsViewController {
-
     private func isImageFavorite() -> Bool {
         var isFavorite = false
         let realmImage = StorageManager.shared.realm?.object(ofType: Image.self, forPrimaryKey: imageDetails.id)
@@ -81,25 +71,28 @@ extension ImageDetailsViewController {
         return isFavorite
     }
 
-    private func configureBarButtonItems() -> [UIBarButtonItem] {
+    private func configureBarButtonItems() {
         if isImageFavorite() == true {
-            return [deleteFromFavoritesButton, showImageDetailsButton]
+            navigationItem.rightBarButtonItems = [deleteFromFavoritesButton, showImageDetailsButton]
         } else {
-            return [addToFavoritesButton, showImageDetailsButton]
+            navigationItem.rightBarButtonItems = [addToFavoritesButton, showImageDetailsButton]
         }
     }
 
-    private func setupNavBar() {
-        navigationItem.rightBarButtonItems = configureBarButtonItems()
+    private func deleteFromFavoritesIfNeeded() {
+        if deleteNeeded == true {
+            StorageManager.shared.delete(imageDetails)
+        }
     }
 
     @objc func addToFavorites() {
+        deleteNeeded = false
         StorageManager.shared.save(imageDetails)
         navigationItem.rightBarButtonItem = deleteFromFavoritesButton
     }
 
     @objc func deleteFromFavorites() {
-        StorageManager.shared.delete(imageDetails)
+        deleteNeeded = true
         navigationItem.rightBarButtonItem = addToFavoritesButton
     }
 
@@ -120,31 +113,18 @@ extension ImageDetailsViewController {
         alert.addAction(okAction)
         present(alert, animated: true)
     }
-
-    private func getLikesOrDownloadsText() -> String {
-        var text = ""
-        let downloads = "Downloads: \(String(imageDetails.downloads ?? 0))"
-        let likes = "Likes: \(imageDetails.likes)"
-        if imageDetails.downloads == nil {
-            text = likes
-        } else {
-            text = downloads
-        }
-        return text
-    }
 }
 
 // MARK: - Private methods
 private extension ImageDetailsViewController {
     func setupView() {
-        view.addSubview(imageView)
-        view.addSubview(spinner)
+        view.addSubview(photoView)
 
         NSLayoutConstraint.activate([
-            imageView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            imageView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            imageView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            imageView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
+            photoView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            photoView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            photoView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            photoView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
         ])
     }
 
@@ -165,14 +145,26 @@ private extension ImageDetailsViewController {
         return convertedString
     }
 
+    func getLikesOrDownloadsText() -> String {
+        var text = ""
+        let downloads = "Downloads: \(String(imageDetails.downloads ?? 0))"
+        let likes = "Likes: \(imageDetails.likes)"
+        if imageDetails.downloads == nil {
+            text = likes
+        } else {
+            text = downloads
+        }
+        return text
+    }
+
     func getImageWithHighResolution() {
-        spinner.startAnimating()
+        photoView.spinner.startAnimating()
         NetworkManager.shared.fetchImage(imageType: .regular, imageData: imageDetails) { result in
             switch result {
             case .success(let imageData):
                 DispatchQueue.main.async {
-                    self.imageView.image = UIImage(data: imageData)
-                    self.spinner.stopAnimating()
+                    self.photoView.imageView.image = UIImage(data: imageData)
+                    self.photoView.spinner.stopAnimating()
                 }
             case .failure(let error):
                 print(error)

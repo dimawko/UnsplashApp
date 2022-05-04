@@ -21,6 +21,8 @@
 		C2D6E780281A8B0B00135BB8 /* ImageDetailsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2D6E77F281A8B0B00135BB8 /* ImageDetailsViewController.swift */; };
 		C2D6E783281ACAD700135BB8 /* Realm in Frameworks */ = {isa = PBXBuildFile; productRef = C2D6E782281ACAD700135BB8 /* Realm */; };
 		C2D6E785281ACAD700135BB8 /* RealmSwift in Frameworks */ = {isa = PBXBuildFile; productRef = C2D6E784281ACAD700135BB8 /* RealmSwift */; };
+		C2EBB2FD2822BCA7005BF3EB /* SearchController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2EBB2FC2822BCA7005BF3EB /* SearchController.swift */; };
+		C2EBB3032822C21E005BF3EB /* PhotoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2EBB3022822C21E005BF3EB /* PhotoView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -38,6 +40,8 @@
 		C2ADF70C2819E33000D718E1 /* NetworkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkManager.swift; sourceTree = "<group>"; };
 		C2ADF70F2819E34F00D718E1 /* Image.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Image.swift; sourceTree = "<group>"; };
 		C2D6E77F281A8B0B00135BB8 /* ImageDetailsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageDetailsViewController.swift; sourceTree = "<group>"; };
+		C2EBB2FC2822BCA7005BF3EB /* SearchController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchController.swift; sourceTree = "<group>"; };
+		C2EBB3022822C21E005BF3EB /* PhotoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -74,23 +78,24 @@
 			children = (
 				C2ADF70E2819E33600D718E1 /* Models */,
 				C2ADF70B2819E32000D718E1 /* Services */,
-				C2ADF7082819E30C00D718E1 /* Custom UI */,
-				C2ADF7012819E29300D718E1 /* ViewControllers */,
+				C2ADF7082819E30C00D718E1 /* View */,
+				C2ADF7012819E29300D718E1 /* Controllers */,
 				C2ADF7062819E2F500D718E1 /* App */,
 				C2ADF7072819E2FD00D718E1 /* Resources */,
 			);
 			path = UnsplashApp;
 			sourceTree = "<group>";
 		};
-		C2ADF7012819E29300D718E1 /* ViewControllers */ = {
+		C2ADF7012819E29300D718E1 /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
 				C2ADF7022819E2E500D718E1 /* TabBarViewController.swift */,
 				C2ADF7042819E2EC00D718E1 /* ImagesCollectionViewController.swift */,
 				C2D6E77F281A8B0B00135BB8 /* ImageDetailsViewController.swift */,
 				C2ADD5A02819C88700DC77AA /* FavoriteImagesTableViewController.swift */,
+				C2EBB2FC2822BCA7005BF3EB /* SearchController.swift */,
 			);
-			path = ViewControllers;
+			path = Controllers;
 			sourceTree = "<group>";
 		};
 		C2ADF7062819E2F500D718E1 /* App */ = {
@@ -111,13 +116,14 @@
 			path = Resources;
 			sourceTree = "<group>";
 		};
-		C2ADF7082819E30C00D718E1 /* Custom UI */ = {
+		C2ADF7082819E30C00D718E1 /* View */ = {
 			isa = PBXGroup;
 			children = (
 				C2ADF7092819E31A00D718E1 /* ImageCollectionViewCell.swift */,
 				C2A4D98C281BF9F900600184 /* FavoriteImageTableViewCell.swift */,
+				C2EBB3022822C21E005BF3EB /* PhotoView.swift */,
 			);
-			path = "Custom UI";
+			path = View;
 			sourceTree = "<group>";
 		};
 		C2ADF70B2819E32000D718E1 /* Services */ = {
@@ -238,8 +244,10 @@
 				C2ADD5A12819C88700DC77AA /* FavoriteImagesTableViewController.swift in Sources */,
 				C2ADF7102819E34F00D718E1 /* Image.swift in Sources */,
 				C2ADD5892819C41F00DC77AA /* AppDelegate.swift in Sources */,
+				C2EBB3032822C21E005BF3EB /* PhotoView.swift in Sources */,
 				C2ADD58B2819C41F00DC77AA /* SceneDelegate.swift in Sources */,
 				C2ADF70D2819E33000D718E1 /* NetworkManager.swift in Sources */,
+				C2EBB2FD2822BCA7005BF3EB /* SearchController.swift in Sources */,
 				C2D6E780281A8B0B00135BB8 /* ImageDetailsViewController.swift in Sources */,
 				C2ADF7052819E2EC00D718E1 /* ImagesCollectionViewController.swift in Sources */,
 				C22E192F281AD252008EC586 /* StorageManager.swift in Sources */,

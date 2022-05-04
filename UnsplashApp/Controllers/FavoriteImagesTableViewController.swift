@@ -15,7 +15,7 @@ class FavoriteImagesTableViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        title = "Favorite"
+        navigationItem.title = "Favorite"
         setupTableView()
         favoriteImages = StorageManager.shared.realm?.objects(Image.self)
         print(Realm.Configuration.defaultConfiguration.fileURL!)
@@ -42,7 +42,7 @@ class FavoriteImagesTableViewController: UITableViewController {
         guard let favoriteImage = favoriteImages?[indexPath.row] else { return UITableViewCell() }
 
         cell.nameLabel.text = favoriteImage.user?.name
-        cell.photoImage.image = nil
+        cell.photoView.imageView.image = nil
 
         let representerIdentifier = favoriteImage.id
         cell.representedIdentifier = representerIdentifier
@@ -53,7 +53,7 @@ class FavoriteImagesTableViewController: UITableViewController {
                 let image = UIImage(data: data)
                 DispatchQueue.main.async {
                     if cell.representedIdentifier == representerIdentifier {
-                        cell.photoImage.image = image
+                        cell.photoView.imageView.image = image
                     }
                 }
             case .failure(let error):

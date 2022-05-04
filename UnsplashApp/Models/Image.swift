@@ -29,14 +29,14 @@ class Image: Object, Codable {
 }
 
 class Urls: Object, Codable {
-    @Persisted(primaryKey: true) var regular = ""
+    @Persisted var regular = ""
     @Persisted var small = ""
 }
 
 class User: Object, Codable {
-    @Persisted(primaryKey: true) var name = ""
+    @Persisted var name = ""
 }
 
 class Location: Object, Codable {
-    @Persisted(primaryKey: true) var title: String? = nil
+    @Persisted var title: String? = nil
 }

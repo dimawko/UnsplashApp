@@ -26,35 +26,18 @@ final class StorageManager {
 
     func save(_ image: Image) {
         write {
-            let copy = realm?.create(Image.self, value: image, update: .all)
-            guard let copy = copy else { return }
-            realm?.add(copy)
+            realm?.create(Image.self, value: image, update: .all)
         }
     }
 
     func delete(_ image: Image) {
-        if let deleteUrls = realm?.object(ofType: Urls.self, forPrimaryKey: image.urls?.regular) {
-            write {
-                realm?.delete(deleteUrls)
+        write {
+            if let urls = image.urls, let user = image.user, let location = image.location {
+                realm?.delete(urls)
+                realm?.delete(user)
+                realm?.delete(location)
             }
-        }
-
-        if let deleteUser = realm?.object(ofType: User.self, forPrimaryKey: image.user?.name) {
-            write {
-                realm?.delete(deleteUser)
-            }
-        }
-
-        if let deleteLocation  = realm?.object(ofType: Location.self, forPrimaryKey: image.location?.title) {
-            write {
-                realm?.delete(deleteLocation)
-            }
-        }
-
-        if let deleteData = realm?.object(ofType: Image.self, forPrimaryKey: image.id) {
-            write {
-                realm?.delete(deleteData)
-            }
+            realm?.delete(image)
         }
     }
 

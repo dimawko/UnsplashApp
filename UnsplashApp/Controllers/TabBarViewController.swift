@@ -18,14 +18,14 @@ class TabBarViewController: UITabBarController {
     private func setupTabBar() {
         let photosVC = UINavigationController(rootViewController: ImagesCollectionViewController())
         let favoriteVC = UINavigationController(rootViewController: FavoriteImagesTableViewController())
-        photosVC.title = "Photos"
-        favoriteVC.title = "Favorite"
         self.setViewControllers([photosVC, favoriteVC], animated: true)
 
-        let images = ["photo", "heart.fill"]
+        let images = ["house.fill", "heart.fill"]
+        let configuration = UIImage.SymbolConfiguration(scale: .medium)
         guard let items = self.tabBar.items else { return }
         for index in 0..<items.count {
-            items[index].image = UIImage(systemName: images[index])
+            items[index].image = UIImage(systemName: images[index], withConfiguration: configuration)
         }
+        tabBar.tintColor = .black
     }
 }
