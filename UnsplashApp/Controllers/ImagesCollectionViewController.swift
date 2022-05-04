@@ -9,7 +9,6 @@ import UIKit
 
 private enum RandomImageQuery {
     static let count = "count=30"
-
 }
 
 private enum SearchImageQuery {
