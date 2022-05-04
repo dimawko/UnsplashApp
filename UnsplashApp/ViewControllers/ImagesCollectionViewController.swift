@@ -13,7 +13,7 @@ class ImagesCollectionViewController: UICollectionViewController {
     private var images: [Image] = []
     private var searchImages: [Image] = []
     private var isSearching = false
-    private var isLoadNeeded = false
+    private var shouldLoadMoreImageData = false
 
     private lazy var searchController: UISearchController = {
         let searchController = UISearchController(searchResultsController: nil)
@@ -54,7 +54,11 @@ extension ImagesCollectionViewController: UICollectionViewDelegateFlowLayout {
     }
 
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ImageCollectionViewCell.identifier, for: indexPath) as? ImageCollectionViewCell else { return UICollectionViewCell() }
+        guard let cell = collectionView.dequeueReusableCell(
+            withReuseIdentifier: ImageCollectionViewCell.identifier,
+            for: indexPath) as? ImageCollectionViewCell else {
+            return UICollectionViewCell()
+        }
         let image = isSearching ? searchImages[indexPath.row] : images[indexPath.row]
         cell.spinner.startAnimating()
 
@@ -88,12 +92,16 @@ extension ImagesCollectionViewController: UICollectionViewDelegateFlowLayout {
         let lastElement = images.count - 1
         if indexPath.row == lastElement {
             print("will Display cell")
-            isLoadNeeded = true
+            shouldLoadMoreImageData = true
             getMoreImageData()
         }
     }
 
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+    func collectionView(
+        _ collectionView: UICollectionView,
+        layout collectionViewLayout: UICollectionViewLayout,
+        sizeForItemAt indexPath: IndexPath
+    ) -> CGSize {
         return CGSize(width: view.frame.size.width / 3-1, height: 150)
     }
 }
@@ -101,7 +109,11 @@ extension ImagesCollectionViewController: UICollectionViewDelegateFlowLayout {
 // MARK: - Networking
 extension ImagesCollectionViewController {
     private func getImageData() {
-        NetworkManager.shared.fetchImageData(dataType: [Image].self, url: LinkString.randomPhoto, query: "count=30") { result in
+        NetworkManager.shared.fetchImageData(
+            dataType: [Image].self,
+            url: LinkString.randomPhoto,
+            query: "count=30"
+        ) { result in
             switch result {
             case .success(let imageData):
                 DispatchQueue.main.async {
@@ -115,20 +127,34 @@ extension ImagesCollectionViewController {
     }
 
     private func getMoreImageData() {
-        NetworkManager.shared.fetchImageData(dataType: [Image].self, url: LinkString.randomPhoto, query: "count=30") { result in
-            switch result {
-            case .success(let imageData):
-                if self.isLoadNeeded == true {
+        if self.shouldLoadMoreImageData == true {
+            NetworkManager.shared.fetchImageData(
+                dataType: [Image].self,
+                url: LinkString.randomPhoto,
+                query: "count=30"
+            ) { result in
+                switch result {
+                case .success(let imageData):
                     DispatchQueue.main.async {
+                        let newIndexPaths = self.setupNewIndexPaths(imageData: imageData)
                         self.images.append(contentsOf: imageData)
-                        self.collectionView.reloadData()
-                        self.isLoadNeeded = false
+                        self.collectionView.insertItems(at: newIndexPaths)
+                        self.shouldLoadMoreImageData = false
                     }
+                case .failure(let error):
+                    print(error)
                 }
-            case .failure(let error):
-                print(error)
             }
         }
+    }
+
+    private func setupNewIndexPaths(imageData: [Image]) -> [IndexPath] {
+        var newIndexPaths = [IndexPath]()
+        for image in 0..<imageData.count {
+            let indexPath = IndexPath(row: image + self.images.count, section: 0)
+            newIndexPaths.append(indexPath)
+        }
+        return newIndexPaths
     }
 }
 
@@ -138,7 +164,11 @@ extension ImagesCollectionViewController: UISearchControllerDelegate, UISearchBa
         guard let searchText = searchController.searchBar.text else { return }
 
         isSearching = true
-        NetworkManager.shared.fetchImageData(dataType: SearchResults.self, url: LinkString.searchPhoto, query: "query=\(searchText)") { result in
+        NetworkManager.shared.fetchImageData(
+            dataType: SearchResults.self,
+            url: LinkString.searchPhoto,
+            query: "query=\(searchText)"
+        ) { result in
             switch result {
             case .success(let searchResults):
                 DispatchQueue.main.async {

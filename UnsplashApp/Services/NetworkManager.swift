@@ -13,7 +13,7 @@ enum LinkString {
     static let apiKey = "&client_id=jl7DJcBPGRgow1g6KiOaUQWU5ZRStIDPqXu5ZSJaJAM"
 }
 
-enum ImageType {
+enum ImageSize {
     case small
     case regular
 }
@@ -25,17 +25,21 @@ final class NetworkManager {
 
     private init() {}
 
-    func fetchImage(imageType: ImageType, imageData: Image, completion: @escaping(Result<Data, Error>) -> Void) {
+    func fetchImage(
+        imageType: ImageSize,
+        imageData: Image,
+        completion: @escaping(Result<Data, Error>) -> Void
+    ) {
         var imageUrl = ""
         guard let imageDataUrls = imageData.urls else { return }
 
         switch imageType {
         case .small:
             imageUrl = imageDataUrls.small
-
         case .regular:
             imageUrl = imageDataUrls.regular
         }
+
         // MARK: - Checking if the image is already in a cache
         if let imageData = cachedImages.object(forKey: imageUrl as NSString) {
             completion(.success(imageData as Data))
@@ -59,7 +63,12 @@ final class NetworkManager {
         }.resume()
     }
 
-    func fetchImageData<T: Decodable>(dataType: T.Type, url: String, query: String, completion: @escaping (Result<T, Error>) -> Void) {
+    func fetchImageData<T: Decodable>(
+        dataType: T.Type,
+        url: String,
+        query: String,
+        completion: @escaping (Result<T, Error>) -> Void
+    ) {
         guard let url = URL(string: url + query + LinkString.apiKey ) else { return }
         URLSession.shared.dataTask(with: url) { data, _, error in
             guard let data = data else {
