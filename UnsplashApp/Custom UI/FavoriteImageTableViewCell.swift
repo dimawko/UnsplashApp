@@ -28,7 +28,6 @@ class FavoriteImageTableViewCell: UITableViewCell {
         imageView.contentMode = .scaleAspectFill
         imageView.clipsToBounds = true
         imageView.translatesAutoresizingMaskIntoConstraints = false
-        imageView.setContentHuggingPriority(.defaultLow - 1, for: .horizontal)
         return imageView
     }()
 

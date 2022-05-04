@@ -107,11 +107,11 @@ extension ImageDetailsViewController {
         let userName = imageDetails.user?.name ?? "Unknown"
         let creationDate = formatDate(from: imageDetails.createdAt ?? "Unknown")
         let location = imageDetails.location?.title ?? "Unknown"
-        let downloads = String(imageDetails.downloads ?? 0)
+        let likesOrDownloadsText = getLikesOrDownloadsText()
 
         let alert = UIAlertController(
             title: "Author: \(userName)",
-            message: "Created: \(String(describing: creationDate))\n Location: \(location)\n Downloads: \(downloads)",
+            message: "Created: \(String(describing: creationDate))\n Location: \(location)\n \(likesOrDownloadsText)",
             preferredStyle: .alert
         )
 
@@ -119,6 +119,18 @@ extension ImageDetailsViewController {
 
         alert.addAction(okAction)
         present(alert, animated: true)
+    }
+
+    private func getLikesOrDownloadsText() -> String {
+        var text = ""
+        let downloads = "Downloads: \(String(imageDetails.downloads ?? 0))"
+        let likes = "Likes: \(imageDetails.likes)"
+        if imageDetails.downloads == nil {
+            text = likes
+        } else {
+            text = downloads
+        }
+        return text
     }
 }
 

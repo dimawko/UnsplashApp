@@ -9,11 +9,10 @@ import UIKit
 
 class ImagesCollectionViewController: UICollectionViewController {
 
-    // MARK: - Private properties
-    private var images: [Image] = []
+    private var randomImages: [Image] = []
     private var searchImages: [Image] = []
     private var isSearching = false
-    private var shouldLoadMoreImageData = false
+    private var loadMoreRandomImages = false
 
     private lazy var searchController: UISearchController = {
         let searchController = UISearchController(searchResultsController: nil)
@@ -43,14 +42,14 @@ class ImagesCollectionViewController: UICollectionViewController {
 
         setupNavBar()
         collectionView.register(ImageCollectionViewCell.self, forCellWithReuseIdentifier: ImageCollectionViewCell.identifier)
-        getImageData()
+        getRandomImages()
     }
 }
 
 // MARK: - Collection view data source and delegate methods
 extension ImagesCollectionViewController: UICollectionViewDelegateFlowLayout {
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        isSearching ? searchImages.count : images.count
+        isSearching ? searchImages.count : randomImages.count
     }
 
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -59,7 +58,8 @@ extension ImagesCollectionViewController: UICollectionViewDelegateFlowLayout {
             for: indexPath) as? ImageCollectionViewCell else {
             return UICollectionViewCell()
         }
-        let image = isSearching ? searchImages[indexPath.row] : images[indexPath.row]
+
+        let image = isSearching ? searchImages[indexPath.row] : randomImages[indexPath.row]
         cell.spinner.startAnimating()
 
         NetworkManager.shared.fetchImage(imageType: .small, imageData: image) { result in
@@ -79,7 +79,7 @@ extension ImagesCollectionViewController: UICollectionViewDelegateFlowLayout {
 
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         searchController.searchBar.endEditing(true)
-        let imageDetails = isSearching ? searchImages[indexPath.row] : images[indexPath.row]
+        let imageDetails = isSearching ? searchImages[indexPath.row] : randomImages[indexPath.row]
 
         let imageDetailsVC = ImageDetailsViewController()
         imageDetailsVC.modalPresentationStyle = .currentContext
@@ -89,12 +89,7 @@ extension ImagesCollectionViewController: UICollectionViewDelegateFlowLayout {
     }
 
     override func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        let lastElement = images.count - 1
-        if indexPath.row == lastElement {
-            print("will Display cell")
-            shouldLoadMoreImageData = true
-            getMoreImageData()
-        }
+        setupNextCells(indexPath: indexPath)
     }
 
     func collectionView(
@@ -108,7 +103,7 @@ extension ImagesCollectionViewController: UICollectionViewDelegateFlowLayout {
 
 // MARK: - Networking
 extension ImagesCollectionViewController {
-    private func getImageData() {
+    private func getRandomImages() {
         NetworkManager.shared.fetchImageData(
             dataType: [Image].self,
             url: LinkString.randomPhoto,
@@ -117,7 +112,7 @@ extension ImagesCollectionViewController {
             switch result {
             case .success(let imageData):
                 DispatchQueue.main.async {
-                    self.images = imageData
+                    self.randomImages = imageData
                     self.collectionView.reloadData()
                 }
             case .failure(let error):
@@ -126,20 +121,20 @@ extension ImagesCollectionViewController {
         }
     }
 
-    private func getMoreImageData() {
-        if self.shouldLoadMoreImageData == true {
+    private func getMoreRandomImages() {
+        if loadMoreRandomImages == true {
             NetworkManager.shared.fetchImageData(
                 dataType: [Image].self,
                 url: LinkString.randomPhoto,
                 query: "count=30"
             ) { result in
                 switch result {
-                case .success(let imageData):
+                case .success(let randomImages):
                     DispatchQueue.main.async {
-                        let newIndexPaths = self.setupNewIndexPaths(imageData: imageData)
-                        self.images.append(contentsOf: imageData)
+                        let newIndexPaths = self.setupNewIndexPaths(for: randomImages)
+                        self.randomImages.append(contentsOf: randomImages)
                         self.collectionView.insertItems(at: newIndexPaths)
-                        self.shouldLoadMoreImageData = false
+                        self.loadMoreRandomImages = false
                     }
                 case .failure(let error):
                     print(error)
@@ -148,13 +143,28 @@ extension ImagesCollectionViewController {
         }
     }
 
-    private func setupNewIndexPaths(imageData: [Image]) -> [IndexPath] {
-        var newIndexPaths = [IndexPath]()
-        for image in 0..<imageData.count {
-            let indexPath = IndexPath(row: image + self.images.count, section: 0)
-            newIndexPaths.append(indexPath)
+    private func getSearchImages(searchText: String, searchPage: Int = 1) {
+        NetworkManager.shared.fetchImageData(
+            dataType: SearchResults.self,
+            url: LinkString.searchPhoto,
+            query: "query=\(searchText.lowercased())&per_page=30&page=\(searchPage)"
+        ) { result in
+            switch result {
+            case .success(let searchResults):
+                DispatchQueue.main.async {
+                    if searchPage == 1 {
+                        self.searchImages = searchResults.results
+                        self.collectionView.reloadData()
+                    } else {
+                        let newIndexPaths = self.setupNewIndexPaths(for: searchResults.results)
+                        self.searchImages.append(contentsOf: searchResults.results)
+                        self.collectionView.insertItems(at: newIndexPaths)
+                    }
+                }
+            case .failure(let error):
+                print(error)
+            }
         }
-        return newIndexPaths
     }
 }
 
@@ -162,22 +172,8 @@ extension ImagesCollectionViewController {
 extension ImagesCollectionViewController: UISearchControllerDelegate, UISearchBarDelegate, UITextFieldDelegate {
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         guard let searchText = searchController.searchBar.text else { return }
-
         isSearching = true
-        NetworkManager.shared.fetchImageData(
-            dataType: SearchResults.self,
-            url: LinkString.searchPhoto,
-            query: "query=\(searchText)"
-        ) { result in
-            switch result {
-            case .success(let searchResults):
-                DispatchQueue.main.async {
-                    self.searchImages = searchResults.results
-                }
-            case .failure(let error):
-                print(error)
-            }
-        }
+        getSearchImages(searchText: searchText)
     }
 
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
@@ -187,6 +183,44 @@ extension ImagesCollectionViewController: UISearchControllerDelegate, UISearchBa
                 searchBar.resignFirstResponder()
                 self.isSearching = false
                 self.collectionView.reloadData()
+            }
+        }
+    }
+}
+
+// MARK: - Set up next cells
+private extension ImagesCollectionViewController {
+    func setupNewIndexPaths(for loadedImages: [Image]) -> [IndexPath] {
+        var newIndexPaths = [IndexPath]()
+        var newIndexPath = IndexPath()
+        for loadedImage in 0..<loadedImages.count {
+            if isSearching == false {
+                newIndexPath = IndexPath(row: loadedImage + self.randomImages.count, section: 0)
+            } else {
+                newIndexPath = IndexPath(row: loadedImage + self.searchImages.count, section: 0)
+            }
+            newIndexPaths.append(newIndexPath)
+        }
+        return newIndexPaths
+    }
+
+    func setupNextCells(indexPath: IndexPath) {
+        var indexForLastVisibleCell = 0
+        if isSearching == false {
+            indexForLastVisibleCell = randomImages.count - 1
+            if indexPath.row == indexForLastVisibleCell {
+                print("will Display cell")
+                loadMoreRandomImages = true
+                getMoreRandomImages()
+            }
+        } else {
+            guard let searchText = searchController.searchBar.text else { return }
+            indexForLastVisibleCell = searchImages.count - 1
+            if indexPath.row == indexForLastVisibleCell {
+                var nextPage = 2
+                print("will display Search cell")
+                getSearchImages(searchText: searchText, searchPage: nextPage)
+                nextPage += 1
             }
         }
     }
