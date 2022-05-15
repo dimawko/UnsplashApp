@@ -5,6 +5,7 @@
 - Adding images to the favorite list and save them in database
 ## Stack
 - MVC
+- REST API
 - URLSession
 - Programmatic UI
 - Realm
